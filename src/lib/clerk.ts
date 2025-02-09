@@ -1,11 +1,10 @@
+import { CLERK_CONFIG } from './config';
+
 declare global {
   interface Window {
     Clerk: any;
   }
 }
-
-const CLERK_PUBLISHABLE_KEY = 'pk_live_Y2xlcmsuZHJlYW1tYWNoaW5lYWkuaW8k';
-const CLERK_SCRIPT_URL = 'https://clerk.dreammachineai.io/npm/@clerk/clerk-js@5/dist/clerk.browser.js';
 
 let clerkPromise: Promise<any> | null = null;
 
@@ -17,15 +16,11 @@ const loadClerkScript = (): Promise<void> => {
     }
 
     const script = document.createElement('script');
-    script.src = CLERK_SCRIPT_URL;
+    script.src = CLERK_CONFIG.SCRIPT_URL;
     script.async = true;
     script.crossOrigin = 'anonymous';
-    script.setAttribute('data-clerk-publishable-key', CLERK_PUBLISHABLE_KEY);
-    script.setAttribute('data-clerk-js-script', 'true');
-
     script.onload = () => resolve();
     script.onerror = () => reject(new Error('Failed to load Clerk script'));
-
     document.head.appendChild(script);
   });
 };
@@ -58,12 +53,11 @@ export const initClerk = async () => {
     if (!clerkPromise) {
       clerkPromise = (async () => {
         await loadClerkScript();
-        await waitForClerk();
         if (!window.Clerk) {
-          throw new Error('Clerk still not available after waiting');
+          throw new Error('Clerk still not available after loading script');
         }
         await window.Clerk.load({
-          publishableKey: CLERK_PUBLISHABLE_KEY
+          publishableKey: CLERK_CONFIG.PUBLISHABLE_KEY
         });
         return window.Clerk;
       })();
@@ -72,6 +66,7 @@ export const initClerk = async () => {
     return await clerkPromise;
   } catch (error) {
     clerkPromise = null; // Reset promise on error
+    console.error('Failed to initialize Clerk:', error);
     throw error;
   }
 };

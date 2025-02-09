@@ -5,6 +5,7 @@ import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { VideoGenerator } from './components/VideoGenerator';
 import { initClerk } from './lib/clerk';
+import { API_CONFIG } from './lib/config';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'chat' | 'video'>('chat');
@@ -29,22 +30,29 @@ function App() {
     setMessages(prev => [...prev, { isUser: true, content }]);
 
     try {
-      const response = await fetch(`${API_CHAT_URL}?key=${API_CHAT_KEY}`, {
+      const response = await fetch(API_CONFIG.CHAT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_CONFIG.CHAT_KEY}`
+        },
         body: JSON.stringify({ prompt: content })
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
       const data = await response.json();
       setMessages(prev => [...prev, { 
         isUser: false, 
-        content: data.candidates[0].output 
+        content: data.candidates?.[0]?.output || 'Sorry, I could not generate a response.'
       }]);
     } catch (error) {
       console.error('Chat error:', error);
       setMessages(prev => [...prev, { 
         isUser: false, 
-        content: "Sorry, I encountered an error while processing your message." 
+        content: "I apologize, but I encountered an error while processing your message. Please try again later." 
       }]);
     } finally {
       setLoading(false);
@@ -108,4 +116,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
