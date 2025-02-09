@@ -7,6 +7,6 @@ export const API_CONFIG = {
 
 // Clerk Configuration
 export const CLERK_CONFIG = {
-  PUBLISHABLE_KEY: 'pk_test_valid-clerk-key-123456789',
+  PUBLISHABLE_KEY: 'pk_live_Y2xlcmsuZHJlYW1tYWNoaW5lYWkuaW8k',
   SCRIPT_URL: 'https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js',
 };
